@@ -125,9 +125,9 @@ class HomeAssistantSkill(MycroftSkill):
                 action='on'
             elif action=='aus':
                 action='off'
-            elif action=='runter':
+            elif action=='runter'or action=='dunkler':
                 action='dim'
-            elif action=='heller':
+            elif action=='heller' or action=='hell':
                 action='brighten'
         if action == "on":
             if ha_entity['state'] == action:
