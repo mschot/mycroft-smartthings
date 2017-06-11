@@ -87,6 +87,7 @@ class HomeAssistantSkill(MycroftSkill):
             self.config.get('password'), ssl=self.config.get('ssl', False))
 
     def initialize(self):
+        self.language = self.config_core.get('lang')
         self.load_vocab_files(join(dirname(__file__), 'vocab', self.lang))
         self.load_regex_files(join(dirname(__file__), 'regex', self.lang))
         self.__build_lighting_intent()
@@ -119,6 +120,15 @@ class HomeAssistantSkill(MycroftSkill):
             return
         ha_data = {'entity_id': ha_entity['id']}
 
+        if self.language=='de':
+            if action=='ein':
+                action='on'
+            elif action=='aus':
+                action='off'
+            elif action=='runter'or action=='dunkler':
+                action='dim'
+            elif action=='heller' or action=='hell':
+                action='brighten'
         if action == "on":
             if ha_entity['state'] == action:
                 self.speak_dialog('homeassistant.device.already',\
@@ -136,18 +146,30 @@ class HomeAssistantSkill(MycroftSkill):
         elif action == "dim":
             if ha_entity['state'] == "off":
                 self.speak_dialog('homeassistant.device.off', data={"dev_name": ha_entity['dev_name']})
-                self.speak("Can not dim %s. It is off." % ha_entity['dev_name'])
+                if self.language=='de':
+                    self.speak("Kann %s nicht dimmen. Es ist aus." % ha_entity['dev_name'])
+                else:
+                    self.speak("Can not dim %s. It is off." % ha_entity['dev_name'])
             else:
                 #self.speak_dialog('homeassistant.device.off', data=ha_entity)
-                self.speak("Dimmed the %s" % ha_entity['dev_name'])
+                if self.language=='de':
+                    self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
+                else:
+                    self.speak("Dimmed the %s" % ha_entity['dev_name'])
                 #self.ha.execute_service("homeassistant", "turn_off", ha_data)
         elif action == "brighten":
             if ha_entity['state'] == "off":
                 self.speak_dialog('homeassistant.device.off', data={"dev_name": ha_entity['dev_name']})
-                self.speak("Can not brighten %s. It is off." % ha_entity['dev_name'])
+                if self.language=='de':
+                    self.speak("Kann %s nicht dimmen. Es ist aus." % ha_entity['dev_name'])
+                else:
+                    self.speak("Can not dim %s. It is off." % ha_entity['dev_name'])
             else:
                 #self.speak_dialog('homeassistant.device.off', data=ha_entity)
-                self.speak("Increased brightness of %s" % ha_entity['dev_name'])
+                if self.language=='de':
+                    self.speak("Erhoehe helligkeit auf %s" % ha_entity['dev_name'])
+                else:
+                    self.speak("Increased brightness of %s" % ha_entity['dev_name'])
                 #self.ha.execute_service("homeassistant", "turn_off", ha_data)
         else:
             ##self.speak("I don't know what you want me to do.")
@@ -186,11 +208,17 @@ class HomeAssistantSkill(MycroftSkill):
             sensor_unit = unit_measurement[0]
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
-            self.speak(('Currently {} is {} {}'.format(sensor_name, sensor_state, sensor_unit)))
+            if self.language=='de':
+                self.speak(('{} ist {} {}'.format(sensor_name, sensor_state, sensor_unit)))
+            else:
+                self.speak(('Currently {} is {} {}'.format(sensor_name, sensor_state, sensor_unit)))
         else:
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
-            self.speak('Currently {} is {}'.format(sensor_name, sensor_state))
+            if self.language=='de':
+                self.speak('{} ist {}'.format(sensor_name, sensor_state))
+            else:
+                self.speak('Currently {} is {}'.format(sensor_name, sensor_state))
 
 
     def stop(self):
