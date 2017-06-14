@@ -1,1 +1,1 @@
-(was ist|wo ist|sensor) (?P<Entity>.*)
+(wie ist der wert von|was ist der wert von|sensor) (?P<Entity>.*)
