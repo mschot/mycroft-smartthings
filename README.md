@@ -1,5 +1,7 @@
 # Home Assistant Skill for Mycroft
 
+[![Stories in Ready](https://badge.waffle.io/btotharye/mycroft-homeassistant.svg?label=ready&title=Ready)](http://waffle.io/btotharye/mycroft-homeassistant)
+
 based off the original code from https://github.com/BongoEADGC6/mycroft-home-assistant, spun off my own version since they seem to be inactive.
 
 This is a skill to add [Home Assistant](https://home-assistant.io) support to
