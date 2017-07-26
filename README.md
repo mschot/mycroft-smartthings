@@ -12,6 +12,7 @@ entity types (`light`, `switch`, `scene`, `groups` and `input_boolean`).
 You can always find me in the mycroft slack channel here, http://mycroft-ai-slack-invite.herokuapp.com/
 
 ## Installation
+Before installation ensure you have python-dev package installed for your OS.  For debian this would be `apt-get install python-dev` it is required for the levenstein package.
 
 Clone the repository into your `~/.mycroft/skills` directory. Then install the
 dependencies inside your mycroft virtual environment:
