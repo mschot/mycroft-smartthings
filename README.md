@@ -9,7 +9,7 @@ This is a skill to add [Home Assistant](https://home-assistant.io) support to
 entity types (`light`, `switch`, `scene`, `groups` and `input_boolean`).
 
 ## Support/Help
-You can always find me in the mycroft slack channel here, http://mycroft-ai-slack-invite.herokuapp.com/
+You can always find me in the mycroft mattermost channel here, https://chat.mycroft.ai
 
 ## Installation
 Before installation ensure you have python-dev package installed for your OS.  For debian this would be `apt-get install python-dev` it is required for the levenstein package.
