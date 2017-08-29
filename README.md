@@ -11,6 +11,8 @@ entity types (`light`, `switch`, `scene`, `groups` and `input_boolean`).
 ## Support/Help
 You can always find me in the mycroft mattermost channel here, https://chat.mycroft.ai
 
+If you like this and want to say thanks check out my [Patreon](https://www.patreon.com/Geekedoutsol) I also include special posts here for my Patrons.
+
 ## Installation
 Before installation ensure you have python-dev package installed for your OS.  For debian this would be `apt-get install python-dev` it is required for the levenstein package.
 
