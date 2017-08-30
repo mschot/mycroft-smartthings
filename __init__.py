@@ -174,12 +174,10 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
-                #self.speak_dialog('homeassistant.device.off', data=ha_entity)
                 if self.language == 'de':
                     self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
                 else:
                     self.speak("Dimmed the %s" % ha_entity['dev_name'])
-                #self.ha.execute_service("homeassistant", "turn_off", ha_data)
         elif action == "brighten":
             if ha_entity['state'] == "off":
                 self.speak_dialog('homeassistant.device.off', data={
@@ -191,16 +189,13 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
-                #self.speak_dialog('homeassistant.device.off', data=ha_entity)
                 if self.language == 'de':
                     self.speak("Erhoehe helligkeit auf %s" %
                                ha_entity['dev_name'])
                 else:
                     self.speak("Increased brightness of %s" %
                                ha_entity['dev_name'])
-                #self.ha.execute_service("homeassistant", "turn_off", ha_data)
         else:
-            ##self.speak("I don't know what you want me to do.")
             self.speak_dialog('homeassistant.error.sorry')
 
     def handle_automation_intent(self, message):
@@ -209,7 +204,6 @@ class HomeAssistantSkill(MycroftSkill):
         ha_entity = self.ha.find_entity(entity, ['automation'])
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
             return
@@ -226,7 +220,6 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Entity: %s" % entity)
         ha_entity = self.ha.find_entity(entity, ['sensor', 'device_tracker'])
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
             return
