@@ -69,7 +69,7 @@ class HomeAssistantClient(object):
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
                         return unit_measurement, sensor_name, sensor_state
-                    except:
+                    except BaseException:
                         unit_measurement = 'null'
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
