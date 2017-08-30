@@ -47,7 +47,8 @@ class HomeAssistantClient(object):
                             best_score = score
                             best_entity = {
                                 "id": state['entity_id'],
-                                "dev_name": state['attributes']['friendly_name'],
+                                "dev_name": state['attributes']
+                                ['friendly_name'],
                                 "state": state['state']}
                 except KeyError:
                     pass
