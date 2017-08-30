@@ -41,7 +41,8 @@ class HomeAssistantClient(object):
                     if state['entity_id'].split(".")[0] in types:
                         LOGGER.debug("Entity Data: %s" % state)
                         score = fuzz.ratio(
-                            entity, state['attributes']['friendly_name'].lower())
+                            entity,
+                            state['attributes']['friendly_name'].lower())
                         if score > best_score:
                             best_score = score
                             best_entity = {
@@ -132,7 +133,6 @@ class HomeAssistantSkill(MycroftSkill):
         ha_entity = self.ha.find_entity(
             entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
             return
