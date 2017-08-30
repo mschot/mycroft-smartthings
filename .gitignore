@@ -1,2 +1,6 @@
 *.swp
 *.pyc
+.idea/misc.xml
+.idea/modules.xml
+.idea/mycroft-homeassistant.iml
+.idea/workspace.xml

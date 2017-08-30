@@ -17,7 +17,7 @@ class HomeAssistantClient(object):
     def __init__(self, host, password, port=8123, ssl=False):
         self.ssl = ssl
         if self.ssl:
-            port=443
+            port = 443
             self.url = "https://%s:%d" % (host, port)
         else:
             self.url = "http://%s:%d" % (host, port)
@@ -28,7 +28,8 @@ class HomeAssistantClient(object):
 
     def find_entity(self, entity, types):
         if self.ssl:
-            req = get("%s/api/states" % self.url, headers=self.headers, verify=True)
+            req = get("%s/api/states" %
+                      self.url, headers=self.headers, verify=True)
         else:
             req = get("%s/api/states" % self.url, headers=self.headers)
 
@@ -39,21 +40,27 @@ class HomeAssistantClient(object):
                 try:
                     if state['entity_id'].split(".")[0] in types:
                         LOGGER.debug("Entity Data: %s" % state)
-                        score = fuzz.ratio(entity, state['attributes']['friendly_name'].lower())
+                        score = fuzz.ratio(
+                            entity,
+                            state['attributes']['friendly_name'].lower())
                         if score > best_score:
                             best_score = score
-                            best_entity = { "id": state['entity_id'],
-                                            "dev_name": state['attributes']['friendly_name'],
-                                            "state": state['state'] }
+                            best_entity = {
+                                "id": state['entity_id'],
+                                "dev_name": state['attributes']
+                                ['friendly_name'],
+                                "state": state['state']}
                 except KeyError:
                     pass
             return best_entity
     #
     # checking the entity attributes to be used in the response dialog.
     #
+
     def find_entity_attr(self, entity):
         if self.ssl:
-            req = get("%s/api/states" % self.url, headers=self.headers, verify=True)
+            req = get("%s/api/states" %
+                      self.url, headers=self.headers, verify=True)
         else:
             req = get("%s/api/states" % self.url, headers=self.headers)
 
@@ -61,30 +68,38 @@ class HomeAssistantClient(object):
             for attr in req.json():
                 if attr['entity_id'] == entity:
                     try:
-                        unit_measurement = attr['attributes']['unit_of_measurement']
+                        unit_measur = attr['attributes']['unit_of_measurement']
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measurement, sensor_name, sensor_state
-                    except:
-                        unit_measurement = 'null'
+                        return unit_measur, sensor_name, sensor_state
+                    except BaseException:
+                        unit_measur = 'null'
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measurement, sensor_name, sensor_state
+                        return unit_measur, sensor_name, sensor_state
 
         return None
 
     def execute_service(self, domain, service, data):
         if self.ssl:
-            post("%s/api/services/%s/%s" % (self.url, domain, service), headers=self.headers, data=json.dumps(data), verify=True)
+            post("%s/api/services/%s/%s" % (self.url, domain, service),
+                 headers=self.headers, data=json.dumps(data), verify=True)
         else:
-            post("%s/api/services/%s/%s" % (self.url, domain, service), headers=self.headers, data=json.dumps(data))
+            post("%s/api/services/%s/%s" % (self.url, domain, service),
+                 headers=self.headers, data=json.dumps(data))
 
 # TODO - Localization
+
+
 class HomeAssistantSkill(MycroftSkill):
     def __init__(self):
         super(HomeAssistantSkill, self).__init__(name="HomeAssistantSkill")
-        self.ha = HomeAssistantClient(self.config.get('host'),
-            self.config.get('password'), ssl=self.config.get('ssl', False))
+        self.ha = HomeAssistantClient(
+            self.config.get('host'),
+            self.config.get('password'),
+            ssl=self.config.get(
+                'ssl',
+                False))
 
     def initialize(self):
         self.language = self.config_core.get('lang')
@@ -95,16 +110,19 @@ class HomeAssistantSkill(MycroftSkill):
         self.__build_automation_intent()
 
     def __build_lighting_intent(self):
-        intent = IntentBuilder("LightingIntent").require("LightActionKeyword").require("Action").require("Entity").build()
+        intent = IntentBuilder("LightingIntent").require(
+            "LightActionKeyword").require("Action").require("Entity").build()
         # TODO - Locks, Temperature, Identity location
         self.register_intent(intent, self.handle_lighting_intent)
 
     def __build_automation_intent(self):
-        intent = IntentBuilder("AutomationIntent").require("AutomationActionKeyword").require("Entity").build()
+        intent = IntentBuilder("AutomationIntent").require(
+            "AutomationActionKeyword").require("Entity").build()
         self.register_intent(intent, self.handle_automation_intent)
 
     def __build_sensor_intent(self):
-        intent = IntentBuilder("SensorIntent").require("SensorStatusKeyword").require("Entity").build()
+        intent = IntentBuilder("SensorIntent").require(
+            "SensorStatusKeyword").require("Entity").build()
         # TODO - Locks, Temperature, Identity location
         self.register_intent(intent, self.handle_sensor_intent)
 
@@ -113,68 +131,73 @@ class HomeAssistantSkill(MycroftSkill):
         action = message.data["Action"]
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Action: %s" % action)
-        ha_entity = self.ha.find_entity(entity, ['group','light', 'switch', 'scene', 'input_boolean'])
+        ha_entity = self.ha.find_entity(
+            entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
-            self.speak_dialog('homeassistant.device.unknown', data={"dev_name": ha_entity['dev_name']})
+            self.speak_dialog('homeassistant.device.unknown', data={
+                              "dev_name": ha_entity['dev_name']})
             return
         ha_data = {'entity_id': ha_entity['id']}
 
-        if self.language=='de':
-            if action=='ein':
-                action='on'
-            elif action=='aus':
-                action='off'
-            elif action=='runter'or action=='dunkler':
-                action='dim'
-            elif action=='heller' or action=='hell':
-                action='brighten'
+        if self.language == 'de':
+            if action == 'ein':
+                action = 'on'
+            elif action == 'aus':
+                action = 'off'
+            elif action == 'runter'or action == 'dunkler':
+                action = 'dim'
+            elif action == 'heller' or action == 'hell':
+                action = 'brighten'
         if action == "on":
             if ha_entity['state'] == action:
-                self.speak_dialog('homeassistant.device.already',\
-                        data={ "dev_name": ha_entity['dev_name'], 'action': action })
+                self.speak_dialog(
+                    'homeassistant.device.already', data={
+                        "dev_name": ha_entity['dev_name'], 'action': action})
             else:
                 self.speak_dialog('homeassistant.device.on', data=ha_entity)
                 self.ha.execute_service("homeassistant", "turn_on", ha_data)
         elif action == "off":
             if ha_entity['state'] == action:
-                self.speak_dialog('homeassistant.device.already',\
-                        data={"dev_name": ha_entity['dev_name'], 'action': action })
+                self.speak_dialog(
+                    'homeassistant.device.already', data={
+                        "dev_name": ha_entity['dev_name'], 'action': action})
             else:
                 self.speak_dialog('homeassistant.device.off', data=ha_entity)
                 self.ha.execute_service("homeassistant", "turn_off", ha_data)
         elif action == "dim":
             if ha_entity['state'] == "off":
-                self.speak_dialog('homeassistant.device.off', data={"dev_name": ha_entity['dev_name']})
-                if self.language=='de':
-                    self.speak("Kann %s nicht dimmen. Es ist aus." % ha_entity['dev_name'])
+                self.speak_dialog('homeassistant.device.off', data={
+                                  "dev_name": ha_entity['dev_name']})
+                if self.language == 'de':
+                    self.speak("Kann %s nicht dimmen. Es ist aus." %
+                               ha_entity['dev_name'])
                 else:
-                    self.speak("Can not dim %s. It is off." % ha_entity['dev_name'])
+                    self.speak("Can not dim %s. It is off." %
+                               ha_entity['dev_name'])
             else:
-                #self.speak_dialog('homeassistant.device.off', data=ha_entity)
-                if self.language=='de':
+                if self.language == 'de':
                     self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
                 else:
                     self.speak("Dimmed the %s" % ha_entity['dev_name'])
-                #self.ha.execute_service("homeassistant", "turn_off", ha_data)
         elif action == "brighten":
             if ha_entity['state'] == "off":
-                self.speak_dialog('homeassistant.device.off', data={"dev_name": ha_entity['dev_name']})
-                if self.language=='de':
-                    self.speak("Kann %s nicht dimmen. Es ist aus." % ha_entity['dev_name'])
+                self.speak_dialog('homeassistant.device.off', data={
+                                  "dev_name": ha_entity['dev_name']})
+                if self.language == 'de':
+                    self.speak("Kann %s nicht dimmen. Es ist aus." %
+                               ha_entity['dev_name'])
                 else:
-                    self.speak("Can not dim %s. It is off." % ha_entity['dev_name'])
+                    self.speak("Can not dim %s. It is off." %
+                               ha_entity['dev_name'])
             else:
-                #self.speak_dialog('homeassistant.device.off', data=ha_entity)
-                if self.language=='de':
-                    self.speak("Erhoehe helligkeit auf %s" % ha_entity['dev_name'])
+                if self.language == 'de':
+                    self.speak("Erhoehe helligkeit auf %s" %
+                               ha_entity['dev_name'])
                 else:
-                    self.speak("Increased brightness of %s" % ha_entity['dev_name'])
-                #self.ha.execute_service("homeassistant", "turn_off", ha_data)
+                    self.speak("Increased brightness of %s" %
+                               ha_entity['dev_name'])
         else:
-            ##self.speak("I don't know what you want me to do.")
             self.speak_dialog('homeassistant.error.sorry')
-
 
     def handle_automation_intent(self, message):
         entity = message.data["Entity"]
@@ -182,13 +205,13 @@ class HomeAssistantSkill(MycroftSkill):
         ha_entity = self.ha.find_entity(entity, ['automation'])
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
-            self.speak_dialog('homeassistant.device.unknown', data={"dev_name": ha_entity['dev_name']})
+            self.speak_dialog('homeassistant.device.unknown', data={
+                              "dev_name": ha_entity['dev_name']})
             return
         LOGGER.debug("Triggered automation on: {}".format(ha_data))
         self.ha.execute_service('automation', 'trigger', ha_data)
-        self.speak_dialog('homeassistant.automation.trigger', data={"dev_name": ha_entity['dev_name']})
-
+        self.speak_dialog('homeassistant.automation.trigger',
+                          data={"dev_name": ha_entity['dev_name']})
 
     #
     # In progress, still testing.
@@ -198,8 +221,8 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Entity: %s" % entity)
         ha_entity = self.ha.find_entity(entity, ['sensor', 'device_tracker'])
         if ha_entity is None:
-            #self.speak("Sorry, I can't find the Home Assistant entity %s" % entity)
-            self.speak_dialog('homeassistant.device.unknown', data={"dev_name": ha_entity['dev_name']})
+            self.speak_dialog('homeassistant.device.unknown', data={
+                              "dev_name": ha_entity['dev_name']})
             return
         ha_data = ha_entity
         entity = ha_entity['id']
@@ -208,18 +231,20 @@ class HomeAssistantSkill(MycroftSkill):
             sensor_unit = unit_measurement[0]
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
-            if self.language=='de':
-                self.speak(('{} ist {} {}'.format(sensor_name, sensor_state, sensor_unit)))
+            if self.language == 'de':
+                self.speak(('{} ist {} {}'.format(
+                    sensor_name, sensor_state, sensor_unit)))
             else:
-                self.speak(('Currently {} is {} {}'.format(sensor_name, sensor_state, sensor_unit)))
+                self.speak(('Currently {} is {} {}'.format(
+                    sensor_name, sensor_state, sensor_unit)))
         else:
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
-            if self.language=='de':
+            if self.language == 'de':
                 self.speak('{} ist {}'.format(sensor_name, sensor_state))
             else:
-                self.speak('Currently {} is {}'.format(sensor_name, sensor_state))
-
+                self.speak('Currently {} is {}'.format(
+                    sensor_name, sensor_state))
 
     def stop(self):
         pass
