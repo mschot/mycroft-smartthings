@@ -67,15 +67,15 @@ class HomeAssistantClient(object):
             for attr in req.json():
                 if attr['entity_id'] == entity:
                     try:
-                        unit_measurement = attr['attributes']['unit_of_measurement']
+                        unit_measure = attr['attributes']['unit_of_measurement']
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measurement, sensor_name, sensor_state
+                        return unit_measure, sensor_name, sensor_state
                     except BaseException:
-                        unit_measurement = 'null'
+                        unit_measure = 'null'
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measurement, sensor_name, sensor_state
+                        return unit_measure, sensor_name, sensor_state
 
         return None
 
