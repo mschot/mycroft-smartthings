@@ -44,9 +44,10 @@ class HomeAssistantClient(object):
                             entity, state['attributes']['friendly_name'].lower())
                         if score > best_score:
                             best_score = score
-                            best_entity = {"id": state['entity_id'],
-                                           "dev_name": state['attributes']['friendly_name'],
-                                           "state": state['state']}
+                            best_entity = {
+                                "id": state['entity_id'],
+                                "dev_name": state['attributes']['friendly_name'],
+                                "state": state['state']}
                 except KeyError:
                     pass
             return best_entity
@@ -91,8 +92,12 @@ class HomeAssistantClient(object):
 class HomeAssistantSkill(MycroftSkill):
     def __init__(self):
         super(HomeAssistantSkill, self).__init__(name="HomeAssistantSkill")
-        self.ha = HomeAssistantClient(self.config.get('host'),
-                                      self.config.get('password'), ssl=self.config.get('ssl', False))
+        self.ha = HomeAssistantClient(
+            self.config.get('host'),
+            self.config.get('password'),
+            ssl=self.config.get(
+                'ssl',
+                False))
 
     def initialize(self):
         self.language = self.config_core.get('lang')
@@ -144,15 +149,17 @@ class HomeAssistantSkill(MycroftSkill):
                 action = 'brighten'
         if action == "on":
             if ha_entity['state'] == action:
-                self.speak_dialog('homeassistant.device.already',
-                                  data={"dev_name": ha_entity['dev_name'], 'action': action})
+                self.speak_dialog(
+                    'homeassistant.device.already', data={
+                        "dev_name": ha_entity['dev_name'], 'action': action})
             else:
                 self.speak_dialog('homeassistant.device.on', data=ha_entity)
                 self.ha.execute_service("homeassistant", "turn_on", ha_data)
         elif action == "off":
             if ha_entity['state'] == action:
-                self.speak_dialog('homeassistant.device.already',
-                                  data={"dev_name": ha_entity['dev_name'], 'action': action})
+                self.speak_dialog(
+                    'homeassistant.device.already', data={
+                        "dev_name": ha_entity['dev_name'], 'action': action})
             else:
                 self.speak_dialog('homeassistant.device.off', data=ha_entity)
                 self.ha.execute_service("homeassistant", "turn_off", ha_data)
