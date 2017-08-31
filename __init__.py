@@ -14,13 +14,13 @@ LOGGER = getLogger(__name__)
 
 
 class HomeAssistantClient(object):
-    def __init__(self, host, password, port=8123, ssl=False):
+    def __init__(self, host, password, portnum, ssl=False):
         self.ssl = ssl
         if self.ssl:
-            port = 443
-            self.url = "https://%s:%d" % (host, port)
+            portnum
+            self.url = "https://%s:%d" % (host, portnum)
         else:
-            self.url = "http://%s:%d" % (host, port)
+            self.url = "http://%s:%d" % (host, portnum)
         self.headers = {
             'x-ha-access': password,
             'Content-Type': 'application/json'
@@ -97,6 +97,7 @@ class HomeAssistantSkill(MycroftSkill):
         self.ha = HomeAssistantClient(
             self.config.get('host'),
             self.config.get('password'),
+            self.config.get('portnum'),
             ssl=self.config.get(
                 'ssl',
                 False))
