@@ -39,7 +39,7 @@ Add a block to your `~/.mycroft/mycroft.conf` file like this:
   "HomeAssistantSkill": {
     "host": "hass.mylan.net",
     "password": "mysupersecrethasspass",
-    "portnum":8123,
+    "portnum": 8123,
     "ssl": true|false
   }
 ```
