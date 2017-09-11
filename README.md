@@ -28,7 +28,8 @@ workon mycroft
 cd HomeAssistantSkill
 pip install -r requirements.txt
 ```
-
+Note: python-Levenshtein requires python-dev to be installed.
+```sudo apt-get install python-dev```
 
 
 ## Configuration
