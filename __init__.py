@@ -68,15 +68,15 @@ class HomeAssistantClient(object):
             for attr in req.json():
                 if attr['entity_id'] == entity:
                     try:
-                        unit_measur = attr['attributes']['unit_of_measurement']
+                        unit_measure = attr['attributes']['unit_of_measurement']
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measur, sensor_name, sensor_state
+                        return unit_measure, sensor_name, sensor_state
                     except BaseException:
-                        unit_measur = 'null'
+                        unit_measure = 'null'
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
-                        return unit_measur, sensor_name, sensor_state
+                        return unit_measure, sensor_name, sensor_state
 
         return None
 
@@ -124,8 +124,14 @@ class HomeAssistantSkill(MycroftSkill):
     def __build_sensor_intent(self):
         intent = IntentBuilder("SensorIntent").require(
             "SensorStatusKeyword").require("Entity").build()
-        # TODO - Locks, Temperature, Identity location
+        # TODO - Sensors - Locks, Temperature, etc
         self.register_intent(intent, self.handle_sensor_intent)
+
+    def __build_tracker_intent(self):
+        intent = IntentBuilder("TrackerIntent").require(
+            "DeviceTrackerKeyword").require("Entity").build()
+        # TODO - Identity location, proximity
+        self.register_intent(intent, self.handle_tracker_intent)
 
     def handle_lighting_intent(self, message):
         entity = message.data["Entity"]
@@ -220,7 +226,7 @@ class HomeAssistantSkill(MycroftSkill):
     def handle_sensor_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
-        ha_entity = self.ha.find_entity(entity, ['sensor', 'device_tracker'])
+        ha_entity = self.ha.find_entity(entity, ['sensor'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
@@ -246,6 +252,25 @@ class HomeAssistantSkill(MycroftSkill):
             else:
                 self.speak('Currently {} is {}'.format(
                     sensor_name, sensor_state))
+
+    #
+    # In progress, still testing.
+    #
+    def handle_tracker_intent(self, message):
+        entity = message.data["Entity"]
+        LOGGER.debug("Entity: %s" % entity)
+        ha_entity = self.ha.find_entity(entity, ['device_tracker'])
+        if ha_entity is None:
+            self.speak_dialog('homeassistant.device.unknown', data={
+                              "dev_name": ha_entity['dev_name']})
+            return
+        ha_data = ha_entity
+        entity = ha_entity['id']
+        dev_location = ha_entity['state']
+        self.speak_dialog('homeassistant.tracker.found', \
+                            data={ 'dev_name': entity, 'location': dev_location})
+
+
 
     def stop(self):
         pass
