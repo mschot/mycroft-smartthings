@@ -266,9 +266,10 @@ class HomeAssistantSkill(MycroftSkill):
             return
         ha_data = ha_entity
         entity = ha_entity['id']
+        dev_name = ha_entity['dev_name']
         dev_location = ha_entity['state']
         self.speak_dialog('homeassistant.tracker.found', \
-                            data={ 'dev_name': entity, 'location': dev_location})
+                            data={ 'dev_name': dev_name, 'location': dev_location})
 
 
 
