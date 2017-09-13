@@ -16,8 +16,9 @@ LOGGER = getLogger(__name__)
 class HomeAssistantClient(object):
     def __init__(self, host, password, portnum, ssl=False):
         self.ssl = ssl
+        if portnum == None:
+            portnum = 8123
         if self.ssl:
-            portnum
             self.url = "https://%s:%d" % (host, portnum)
         else:
             self.url = "http://%s:%d" % (host, portnum)
