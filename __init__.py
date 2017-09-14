@@ -17,7 +17,7 @@ class HomeAssistantClient(object):
     def __init__(self, host, password, portnum, ssl=False, verify=True):
         self.ssl = ssl
         self.verify = verify
-        if portnum == None:
+        if portnum is None:
             portnum = 8123
         if self.ssl:
             self.url = "https://%s:%d" % (host, portnum)
@@ -70,12 +70,12 @@ class HomeAssistantClient(object):
             for attr in req.json():
                 if attr['entity_id'] == entity:
                     try:
-                        unit_measure = attr['attributes']['unit_of_measurement']
+                        unit_measur = attr['attributes']['unit_of_measurement']
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
                         return unit_measure, sensor_name, sensor_state
                     except BaseException:
-                        unit_measure = 'null'
+                        unit_measur = 'null'
                         sensor_name = attr['attributes']['friendly_name']
                         sensor_state = attr['state']
                         return unit_measure, sensor_name, sensor_state
@@ -256,10 +256,11 @@ class HomeAssistantSkill(MycroftSkill):
                 self.speak('Currently {} is {}'.format(
                     sensor_name, sensor_state))
 
-    #
     # In progress, still testing.
-    ## Device location works.
-    ## Proximity might be an issue - overlapping command for directions modules (e.g. "How far is x from y?")
+    # Device location works.
+    # Proximity might be an issue
+    # - overlapping command for directions modules
+    # - (e.g. "How far is x from y?")
     def handle_tracker_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
@@ -272,9 +273,8 @@ class HomeAssistantSkill(MycroftSkill):
         entity = ha_entity['id']
         dev_name = ha_entity['dev_name']
         dev_location = ha_entity['state']
-        self.speak_dialog('homeassistant.tracker.found', \
-                            data={ 'dev_name': dev_name, 'location': dev_location})
-
+        self.speak_dialog('homeassistant.tracker.found',
+                            data={'dev_name': dev_name, 'location': dev_location})
 
 
     def stop(self):
