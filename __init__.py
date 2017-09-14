@@ -31,7 +31,7 @@ class HomeAssistantClient(object):
     def find_entity(self, entity, types):
         if self.ssl:
             req = get("%s/api/states" %
-                      self.url, headers=self.headers, verify=False)
+                      self.url, headers=self.headers, verify=self.verify)
         else:
             req = get("%s/api/states" % self.url, headers=self.headers)
 
@@ -85,7 +85,7 @@ class HomeAssistantClient(object):
     def execute_service(self, domain, service, data):
         if self.ssl:
             post("%s/api/services/%s/%s" % (self.url, domain, service),
-                 headers=self.headers, data=json.dumps(data), verify=True)
+                 headers=self.headers, data=json.dumps(data), verify=self.verify)
         else:
             post("%s/api/services/%s/%s" % (self.url, domain, service),
                  headers=self.headers, data=json.dumps(data))
@@ -174,6 +174,7 @@ class HomeAssistantSkill(MycroftSkill):
             else:
                 self.speak_dialog('homeassistant.device.off', data=ha_entity)
                 self.ha.execute_service("homeassistant", "turn_off", ha_data)
+        # TODO - Allow Dimming
         elif action == "dim":
             if ha_entity['state'] == "off":
                 self.speak_dialog('homeassistant.device.off', data={
@@ -185,10 +186,16 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
+                if ha_entity['attributes']['brightness'] < 25:
+                    ha_data['brightness'] = 10
+                else:
+                    ha_data['brightness'] -= 25
+                self.ha.execute_service("homeassistant", "turn_on", ha_data)
                 if self.language == 'de':
                     self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
                 else:
                     self.speak("Dimmed the %s" % ha_entity['dev_name'])
+        # TODO - Allow Brightening
         elif action == "brighten":
             if ha_entity['state'] == "off":
                 self.speak_dialog('homeassistant.device.off', data={
@@ -200,6 +207,11 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
+                if ha_entity['attributes']['brightness'] > 230:
+                    ha_data['brightness'] = 255
+                else:
+                    ha_data['brightness'] += 25
+                self.ha.execute_service("homeassistant", "turn_on", ha_data)
                 if self.language == 'de':
                     self.speak("Erhoehe helligkeit auf %s" %
                                ha_entity['dev_name'])
@@ -273,9 +285,12 @@ class HomeAssistantSkill(MycroftSkill):
         entity = ha_entity['id']
         dev_name = ha_entity['dev_name']
         dev_location = ha_entity['state']
-        self.speak_dialog('homeassistant.tracker.found',
-                          data={'dev_name': dev_name,
-                                'location': dev_location})
+        if self.language == 'de':
+            self.speak('{} ist {}'.format(dev_name, dev_location))
+        else:
+            self.speak_dialog('homeassistant.tracker.found',
+                              data={'dev_name': dev_name,
+                                    'location': dev_location})
 
     def stop(self):
         pass
