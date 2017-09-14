@@ -14,8 +14,9 @@ LOGGER = getLogger(__name__)
 
 
 class HomeAssistantClient(object):
-    def __init__(self, host, password, portnum, ssl=False):
+    def __init__(self, host, password, portnum, ssl=False, verify=True):
         self.ssl = ssl
+        self.verify = verify
         if portnum == None:
             portnum = 8123
         if self.ssl:
@@ -30,7 +31,7 @@ class HomeAssistantClient(object):
     def find_entity(self, entity, types):
         if self.ssl:
             req = get("%s/api/states" %
-                      self.url, headers=self.headers, verify=True)
+                      self.url, headers=self.headers, verify=False)
         else:
             req = get("%s/api/states" % self.url, headers=self.headers)
 
@@ -61,7 +62,7 @@ class HomeAssistantClient(object):
     def find_entity_attr(self, entity):
         if self.ssl:
             req = get("%s/api/states" %
-                      self.url, headers=self.headers, verify=True)
+                      self.url, headers=self.headers, verify=self.verify)
         else:
             req = get("%s/api/states" % self.url, headers=self.headers)
 
@@ -99,17 +100,18 @@ class HomeAssistantSkill(MycroftSkill):
             self.config.get('host'),
             self.config.get('password'),
             self.config.get('portnum'),
-            ssl=self.config.get(
-                'ssl',
-                False))
+            ssl=self.config.get('ssl', False),
+            verify=self.config.get('verify', True)
+            )
 
     def initialize(self):
         self.language = self.config_core.get('lang')
         self.load_vocab_files(join(dirname(__file__), 'vocab', self.lang))
         self.load_regex_files(join(dirname(__file__), 'regex', self.lang))
         self.__build_lighting_intent()
-        self.__build_sensor_intent()
         self.__build_automation_intent()
+        self.__build_sensor_intent()
+        self.__build_tracker_intent()
 
     def __build_lighting_intent(self):
         intent = IntentBuilder("LightingIntent").require(
@@ -256,7 +258,8 @@ class HomeAssistantSkill(MycroftSkill):
 
     #
     # In progress, still testing.
-    #
+    ## Device location works.
+    ## Proximity might be an issue - overlapping command for directions modules (e.g. "How far is x from y?")
     def handle_tracker_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
