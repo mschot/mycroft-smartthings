@@ -85,7 +85,8 @@ class HomeAssistantClient(object):
     def execute_service(self, domain, service, data):
         if self.ssl:
             post("%s/api/services/%s/%s" % (self.url, domain, service),
-                 headers=self.headers, data=json.dumps(data), verify=self.verify)
+                 headers=self.headers, data=json.dumps(data),
+                 verify=self.verify)
         else:
             post("%s/api/services/%s/%s" % (self.url, domain, service),
                  headers=self.headers, data=json.dumps(data))
