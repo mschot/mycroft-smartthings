@@ -84,7 +84,8 @@ Currently the phrases are:
 * Hey Mycroft, turn on office light (to turn on the light named office)
 * Hey Mycroft, activate Bedtime (Bedtime is an automation)
 * Hey Mycroft, turn on Movietime (Movietime is a scene)
-* Hey Mycroft, ask home asssistant where is/what is something (The something can be a sensor in homeassistant)
+* Hey Mycroft, status of thermostat (For sensors in homeassistant)
+* Hey Mycroft, locate/where brian (Brian is a device tracker object)
 
 
 
