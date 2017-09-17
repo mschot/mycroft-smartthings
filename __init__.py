@@ -305,7 +305,7 @@ class HomeAssistantSkill(MycroftSkill):
     def handle_climate_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
-        ha_entity = self.ha.find_entity_attr(entity, ['climate'])
+        ha_entity = self.ha.find_entity(entity, ['climate'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
