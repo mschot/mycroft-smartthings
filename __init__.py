@@ -129,7 +129,7 @@ class HomeAssistantSkill(MycroftSkill):
     def __build_sensor_intent(self):
         intent = IntentBuilder("SensorIntent").require(
             "SensorStatusKeyword").require("Entity").build()
-        # TODO - Sensors - Locks, Temperature, etc
+        # TODO - Sensors - Locks, etc
         self.register_intent(intent, self.handle_sensor_intent)
 
     def __build_tracker_intent(self):
@@ -137,6 +137,11 @@ class HomeAssistantSkill(MycroftSkill):
             "DeviceTrackerKeyword").require("Entity").build()
         # TODO - Identity location, proximity
         self.register_intent(intent, self.handle_tracker_intent)
+
+    def __build_climate_intent(self):
+        intent = IntentBuilder("ClimateIntent").require(
+            "ClimateKeyword").require("Entity").build()
+        self.register_intent(intent, self.handle_climate_intent)
 
     def handle_lighting_intent(self, message):
         entity = message.data["Entity"]
@@ -296,6 +301,20 @@ class HomeAssistantSkill(MycroftSkill):
 
     def stop(self):
         pass
+
+    def handle_climate_intent(self, message):
+        entity = message.data["Entity"]
+        LOGGER.debug("Entity: %s" % entity)
+        ha_entity = self.ha.find_entity_attr(entity, ['climate'])
+        if ha_entity is None:
+            self.speak_dialog('homeassistant.device.unknown', data={
+                              "dev_name": ha_entity['dev_name']})
+            return
+        ha_data = ha_entity
+        entity = ha_entity['id']
+        LOGGER.debug("Here is the entity response: %s" % entity)
+
+
 
 
 def create_skill():
