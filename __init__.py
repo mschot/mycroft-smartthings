@@ -314,7 +314,5 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Here is the entity response: %s" % entity)
 
 
-
-
 def create_skill():
     return HomeAssistantSkill()
