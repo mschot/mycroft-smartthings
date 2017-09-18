@@ -96,6 +96,9 @@ Currently the phrases are:
  * New intent for thermostat values, raising, etc.
  * ...
 
+## In Development
+* Climate and Weather intents
+
 ## Contributing
 
 All contributions welcome:
