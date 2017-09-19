@@ -85,7 +85,11 @@ class HomeAssistantClient(object):
                             sensor_name = entity_attrs['friendly_name']
                             sensor_state = attr['state']
                             return unit_measur, sensor_name, sensor_state
-
+                    except BaseException:
+                        unit_measur = 'null'
+                        sensor_name = attr['attributes']['friendly_name']
+                        sensor_state = attr['state']
+                        return unit_measur, sensor_name, sensor_state
         return None
 
     def execute_service(self, domain, service, data):
