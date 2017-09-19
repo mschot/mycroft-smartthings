@@ -59,7 +59,6 @@ class HomeAssistantClient(object):
     #
 
     def find_entity_attr(self, entity):
-        LOGGER.debug("!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#")
         if self.ssl:
             req = get("%s/api/states" %
                       self.url, headers=self.headers, verify=self.verify)
