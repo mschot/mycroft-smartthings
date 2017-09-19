@@ -85,6 +85,7 @@ class HomeAssistantClient(object):
                             sensor_name = entity_attrs['friendly_name']
                             sensor_state = attr['state']
                             return unit_measur, sensor_name, sensor_state
+
         return None
 
     def execute_service(self, domain, service, data):
@@ -231,7 +232,7 @@ class HomeAssistantSkill(MycroftSkill):
         except KeyError:
             brightness_req = 10.0
         brightness_value = int(brightness_req / 100 * 255)
-        brightness_percentage = int(brightness_req)
+        # brightness_percentage = int(brightness_req) # debating use
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Brightness Value: %s" % brightness_value)
         ha_entity = self.ha.find_entity(
