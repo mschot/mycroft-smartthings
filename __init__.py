@@ -127,14 +127,16 @@ class HomeAssistantSkill(MycroftSkill):
         self.register_intent(intent, self.handle_switch_intent)
 
     def __build_light_set_intent(self):
-        intent = IntentBuilder("LightSetBrightnessIntent").optionally("LightsKeyword") \
-            .require("SetVerb") \
+        intent = IntentBuilder("LightSetBrightnessIntent") \
+            .optionally("LightsKeyword").require("SetVerb") \
             .require("Entity").require("BrightnessValue").build()
         self.register_intent(intent, self.handle_light_set_intent)
 
     def __build_light_adjust_intent(self):
-        intent = IntentBuilder("LightAdjBrightnessIntent").optionally("LightsKeyword") \
-            .one_of("IncreaseVerb", "DecreaseVerb", "LightBrightenVerb", "LightDimVerb") \
+        intent = IntentBuilder("LightAdjBrightnessIntent") \
+            .optionally("LightsKeyword") \
+            .one_of("IncreaseVerb", "DecreaseVerb", "LightBrightenVerb",
+                    "LightDimVerb") \
             .require("Entity").optionally("BrightnessValue").build()
         self.register_intent(intent, self.handle_light_adjust_intent)
 
