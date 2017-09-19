@@ -240,12 +240,11 @@ class HomeAssistantSkill(MycroftSkill):
             return
         ha_data = {'entity_id': ha_entity['id']}
 
-        if self.language == 'de':
-            if action == 'runter'or action == 'dunkler':
-                action = 'dim'
-            elif action == 'heller' or action == 'hell':
-                action = 'brighten'
-        # TODO - Allow Dimming
+        # if self.language == 'de':
+        #    if action == 'runter' or action == 'dunkler':
+        #        action = 'dim'
+        #    elif action == 'heller' or action == 'hell':
+        #        action = 'brighten'
         if "DecreaseVerb" in message.data or \
                 "LightDimVerb" in message.data:
             if ha_entity['state'] == "off":
@@ -267,8 +266,6 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
                 else:
                     self.speak("Dimmed the %s" % ha_entity['dev_name'])
-        # TODO - Allow Brightening
-        # elif action == "brighten":
         elif "IncreaseVerb" in message.data or \
                 "LightBrightenVerb" in message.data:
             if ha_entity['state'] == "off":
