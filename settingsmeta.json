@@ -7,7 +7,7 @@
               "name": "Login",
               "fields": [
                   {
-                      "name": "ha ip or url",
+                      "name": "host",
                       "type": "text",
                       "label": "host",
                       "value": ""
