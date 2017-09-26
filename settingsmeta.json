@@ -1,0 +1,37 @@
+{
+  "identifier": "HomeAssistantSkill",
+  "name": "HomeAssistant",
+  "skillMetadata": {
+      "sections": [
+          {
+              "name": "Login",
+              "fields": [
+                  {
+                      "name": "ha ip or url",
+                      "type": "text",
+                      "label": "host",
+                      "value": ""
+                  },
+                  {
+                      "name": "password",
+                      "type": "password",
+                      "label": "Password",
+                      "value": ""
+                  },
+                  {
+                      "name": "portnum",
+                      "type": "int",
+                      "label": "portnum",
+                      "value": ""
+                  },
+                  {
+                      "name": "ssl",
+                      "type": "bool",
+                      "label": "ssl",
+                      "value": ""
+                  }
+              ]
+          }
+      ]
+  }
+}
