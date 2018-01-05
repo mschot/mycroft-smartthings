@@ -1,1 +1,1 @@
-((turn|switch) (?P<Action>on|off) (?P<Entity>all|every|any) (?P<Domain>light(s)?|sensor(s)?|device(s)?))|((turn|switch) (?P<Action>on|off) (?P<Entity>.*))|((?P<Action>toggle) (?P<Entity>.*))
+((turn|switch) )?(?P<Action>on|off|toggle) (?P<Entity>.*)

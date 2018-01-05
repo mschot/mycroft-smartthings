@@ -315,17 +315,17 @@ class HomeAssistantSkill(MycroftSkill):
                               "dev_name": ha_entity['dev_name']})
             return
         LOGGER.debug("Triggered automation/scene/script: {}".format(ha_data))
-		if "automation" in ha_entity['id']:
+        if "automation" in ha_entity['id']:
             self.ha.execute_service('automation', 'trigger', ha_data)
             self.speak_dialog('homeassistant.automation.trigger',
                           data={"dev_name": ha_entity['dev_name']})
-		elif "script" in ha_entity['id']:
+        elif "script" in ha_entity['id']:
             self.speak_dialog('homeassistant.automation.trigger',
                           data={"dev_name": ha_entity['dev_name']})
             self.ha.execute_service("homeassistant", "turn_on",
                                     data=ha_data)
-		elif "scene" in ha_entity['id']:
-		    self.speak_dialog('homeassistant.device.on',
+        elif "scene" in ha_entity['id']:
+            self.speak_dialog('homeassistant.device.on',
                               data=ha_entity)
             self.ha.execute_service("homeassistant", "turn_on",
                                     data=ha_data)
