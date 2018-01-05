@@ -79,13 +79,16 @@ def handle_lighting_intent(self, message):
 
 
 ## Supported Phrases/Entities
-Currently the phrases are:
+Currently some of the possible phrases are:
 * Hey Mycroft, turn on office (turn on the group office)
 * Hey Mycroft, turn on office light (to turn on the light named office)
 * Hey Mycroft, activate Bedtime (Bedtime is an automation)
 * Hey Mycroft, turn on Movietime (Movietime is a scene)
 * Hey Mycroft, status of thermostat (For sensors in homeassistant)
 * Hey Mycroft, locate/where brian (Brian is a device tracker object)
+* Hey Mycroft, activate Relax (Relax is a scene)
+* Hey Mycroft, toggle the bathroom light
+* Hey Mycroft, fire flickering (flickering is a script)
 
 
 
