@@ -1,1 +1,4 @@
-what is (?P<Entity>.*)
+((in )?(what|which) (status|state|value) (is|has) (?P<Entity>.*))
+((how|what) is (the )?(current )?(?P<Entity>.*)) (status|state|value|sensor)?
+(tell me ((the|our) )?(current )?(?P<Entity>.*)) (status|state|value|sensor)?
+(read (out )?)?(?P<Entity>.*)( (status|state|value|sensor))?
