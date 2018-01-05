@@ -182,6 +182,15 @@ class HomeAssistantSkill(MycroftSkill):
             LOGGER.debug("Entity in requested state")
             self.speak_dialog('homeassistant.device.already', data={
                 "dev_name": ha_entity['dev_name'], 'action': action})
+        elif action == "toggle":
+            self.ha.execute_service("homeassistant", "toggle",
+                                    ha_data)
+            if(ha_entity['state'] == 'off'):
+                action = 'on'
+            else:
+                action = 'off'
+            self.speak_dialog('homeassistant.device.%s' % action,
+              data=ha_entity)
         elif action in ["on", "off"]:
             self.speak_dialog('homeassistant.device.%s' % action,
                               data=ha_entity)
@@ -298,16 +307,28 @@ class HomeAssistantSkill(MycroftSkill):
     def handle_automation_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
-        ha_entity = self.ha.find_entity(entity, ['automation'])
+        # also handle scene and script requests
+        ha_entity = self.ha.find_entity(entity, ['automation', 'scene', 'script'])
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
             return
-        LOGGER.debug("Triggered automation on: {}".format(ha_data))
-        self.ha.execute_service('automation', 'trigger', ha_data)
-        self.speak_dialog('homeassistant.automation.trigger',
+        LOGGER.debug("Triggered automation/scene/script: {}".format(ha_data))
+		if "automation" in ha_entity['id']:
+            self.ha.execute_service('automation', 'trigger', ha_data)
+            self.speak_dialog('homeassistant.automation.trigger',
                           data={"dev_name": ha_entity['dev_name']})
+		elif "script" in ha_entity['id']:
+            self.speak_dialog('homeassistant.automation.trigger',
+                          data={"dev_name": ha_entity['dev_name']})
+            self.ha.execute_service("homeassistant", "turn_on",
+                                    data=ha_data)
+		elif "scene" in ha_entity['id']:
+		    self.speak_dialog('homeassistant.device.on',
+                              data=ha_entity)
+            self.ha.execute_service("homeassistant", "turn_on",
+                                    data=ha_data)
 
     #
     # In progress, still testing.
