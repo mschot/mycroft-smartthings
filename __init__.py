@@ -163,6 +163,7 @@ class HomeAssistantSkill(MycroftSkill):
         action = message.data["Action"]
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Action: %s" % action)
+        # TODO if entity is 'all' or 'every' turn on every single entity not the whole group
         ha_entity = self.ha.find_entity(
             entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
         if ha_entity is None:
