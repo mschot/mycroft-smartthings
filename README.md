@@ -1,5 +1,8 @@
 # Home Assistant Skill for Mycroft
 
+## Updates
+I have been busy for the past bit but will be making updates to this soon.  Thanks again for the support.
+
 [![Stories in Ready](https://badge.waffle.io/btotharye/mycroft-homeassistant.svg?label=ready&title=Ready)](http://waffle.io/btotharye/mycroft-homeassistant) [![Build Status](https://travis-ci.org/btotharye/mycroft-homeassistant.svg?branch=master)](https://travis-ci.org/btotharye/mycroft-homeassistant)
 
 based off the original code from https://github.com/BongoEADGC6/mycroft-home-assistant, spun off my own version since they seem to be inactive.
