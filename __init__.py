@@ -37,15 +37,15 @@ class HomeAssistantClient(object):
             req = get("%s/api/states" % self.url, headers=self.headers)
 
         if req.status_code == 200:
-			# require a score above 50%
+            # require a score above 50%
             best_score = 50
             best_entity = None
             for state in req.json():
                 try:
                     if state['entity_id'].split(".")[0] in types:
-						# something like temperature outside
-						# should score on "outside temperature sensor"
-						# and repetitions should not count on my behalf
+                        # something like temperature outside
+                        # should score on "outside temperature sensor"
+                        # and repetitions should not count on my behalf
                         score = fuzz.token_set_ratio(
                             entity,
                             state['attributes']['friendly_name'].lower())
@@ -380,19 +380,29 @@ class HomeAssistantSkill(MycroftSkill):
                     sensor_name, sensor_state, sensor_unit)))
             else:
                 # extract unit for correct pronounciation
-                quantity = parser.parse((u'{} is {} {}'.format(
+                # this is fully optional
+                try:
+                    from quantulum import parser
+                    quantulumImport = True
+                except ImportError:
+                    quantulumImport = False
+                
+                if quantulumImport:
+                    quantity = parser.parse((u'{} is {} {}'.format(
                     sensor_name, sensor_state, sensor_unit)))
-                if len(quantity) > 0:
-                    quantity = quantity[0]
-                    if (quantity.unit.name != "dimensionless") and (quantity.uncertainty <= 0.5):
-                        sensor_unit = quantity.unit.name
-                        sensor_state = quantity.value
+                    if len(quantity) > 0:
+                        quantity = quantity[0]
+                        if (quantity.unit.name != "dimensionless") and (quantity.uncertainty <= 0.5):
+                            sensor_unit = quantity.unit.name
+                            sensor_state = quantity.value
+                    
+                
                 self.speak_dialog('homeassistant.sensor', data={
                               "dev_name": sensor_name,
-							  "value": sensor_state,
-							  "unit": sensor_unit})
+                              "value": sensor_state,
+                              "unit": sensor_unit})
             # Add some context if the person wants to look the unit up
-			# Maybe also change to name if one wants to look up "outside temperature"
+            # Maybe also change to name if one wants to look up "outside temperature"
             #self.set_context("SubjectOfInterest", sensor_unit)
         else:
             sensor_name = unit_measurement[1]
@@ -402,8 +412,8 @@ class HomeAssistantSkill(MycroftSkill):
             else:
                 self.speak_dialog('homeassistant.sensor', data={
                               "dev_name": sensor_name,
-							  "value": sensor_state,
-							  "unit": "")
+                              "value": sensor_state,
+                              "unit": ''})
 
     # In progress, still testing.
     # Device location works.
