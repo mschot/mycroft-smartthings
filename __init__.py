@@ -8,7 +8,6 @@ from os.path import dirname, join
 from requests import get, post
 from fuzzywuzzy import fuzz
 import json
-from quantulum import parser
 
 __author__ = 'robconnolly, btotharye'
 LOGGER = getLogger(__name__)
