@@ -177,10 +177,10 @@ class HomeAssistantSkill(MycroftSkill):
             return False
         LOGGER.debug("Entity State: %s" % ha_entity['state'])
         ha_data = {'entity_id': ha_entity['id']}
-        
+
         # set context for 'turn it off' again or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         if self.language == 'de':
             if action == 'ein':
                 action = 'on'
@@ -228,10 +228,10 @@ class HomeAssistantSkill(MycroftSkill):
                               "dev_name": entity})
             return False
         ha_data = {'entity_id': ha_entity['id']}
-        
+
         # set context for 'turn it off again' or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         # TODO - Allow value set
         if "SetVerb" in message.data:
             ha_data['brightness'] = brightness_value
@@ -266,8 +266,8 @@ class HomeAssistantSkill(MycroftSkill):
             return False
         ha_data = {'entity_id': ha_entity['id']}
         # set context for 'turn it off again' or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         # if self.language == 'de':
         #    if action == 'runter' or action == 'dunkler':
         #        action = 'dim'
@@ -334,8 +334,8 @@ class HomeAssistantSkill(MycroftSkill):
             return False
 
         # set context for 'turn it off again' or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         LOGGER.debug("Triggered automation/scene/script: {}".format(ha_data))
         if "automation" in ha_entity['id']:
             self.ha.execute_service('automation', 'trigger', ha_data)
@@ -365,10 +365,10 @@ class HomeAssistantSkill(MycroftSkill):
             return False
         ha_data = ha_entity
         entity = ha_entity['id']
-        
+
         # set context for 'read it out again' or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         unit_measurement = self.ha.find_entity_attr(entity)
         if unit_measurement[0] != 'null':
             sensor_unit = unit_measurement[0]
@@ -385,24 +385,25 @@ class HomeAssistantSkill(MycroftSkill):
                     quantulumImport = True
                 except ImportError:
                     quantulumImport = False
-                
+
                 if quantulumImport:
                     quantity = parser.parse((u'{} is {} {}'.format(
-                    sensor_name, sensor_state, sensor_unit)))
+                                      sensor_name, sensor_state, sensor_unit)))
                     if len(quantity) > 0:
                         quantity = quantity[0]
-                        if (quantity.unit.name != "dimensionless") and (quantity.uncertainty <= 0.5):
+                        if ((quantity.unit.name != "dimensionless") and 
+						    (quantity.uncertainty <= 0.5)):
                             sensor_unit = quantity.unit.name
                             sensor_state = quantity.value
-                    
-                
+
                 self.speak_dialog('homeassistant.sensor', data={
                               "dev_name": sensor_name,
                               "value": sensor_state,
                               "unit": sensor_unit})
             # Add some context if the person wants to look the unit up
-            # Maybe also change to name if one wants to look up "outside temperature"
-            #self.set_context("SubjectOfInterest", sensor_unit)
+            # Maybe also change to name 
+			# if one wants to look up "outside temperature"
+            # self.set_context("SubjectOfInterest", sensor_unit)
         else:
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
@@ -428,10 +429,10 @@ class HomeAssistantSkill(MycroftSkill):
                               "dev_name": entity})
             return False
         ha_data = ha_entity
-        
+
         # set context for 'locate it off again' or similar
-        #self.set_context('Entity', ha_entity['dev_name'])
-        
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         entity = ha_entity['id']
         dev_name = ha_entity['dev_name']
         dev_location = ha_entity['state']
