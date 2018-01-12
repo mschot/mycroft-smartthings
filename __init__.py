@@ -36,12 +36,16 @@ class HomeAssistantClient(object):
             req = get("%s/api/states" % self.url, headers=self.headers)
 
         if req.status_code == 200:
-            best_score = 0
+            # require a score above 50%
+            best_score = 50
             best_entity = None
             for state in req.json():
                 try:
                     if state['entity_id'].split(".")[0] in types:
-                        score = fuzz.ratio(
+                        # something like temperature outside
+                        # should score on "outside temperature sensor"
+                        # and repetitions should not count on my behalf
+                        score = fuzz.token_set_ratio(
                             entity,
                             state['attributes']['friendly_name'].lower())
                         if score > best_score:
@@ -169,10 +173,13 @@ class HomeAssistantSkill(MycroftSkill):
             entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
-                              "dev_name": ha_entity['dev_name']})
-            return
+                              "dev_name": entity})
+            return False
         LOGGER.debug("Entity State: %s" % ha_entity['state'])
         ha_data = {'entity_id': ha_entity['id']}
+
+        # set context for 'turn it off' again or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
 
         if self.language == 'de':
             if action == 'ein':
@@ -199,6 +206,7 @@ class HomeAssistantSkill(MycroftSkill):
                                     ha_data)
         else:
             self.speak_dialog('homeassistant.error.sorry')
+            return False
 
     def handle_light_set_intent(self, message):
         entity = message.data["Entity"]
@@ -217,9 +225,13 @@ class HomeAssistantSkill(MycroftSkill):
             entity, ['group', 'light'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
-                              "dev_name": ha_entity['dev_name']})
-            return
+                              "dev_name": entity})
+            return False
         ha_data = {'entity_id': ha_entity['id']}
+
+        # set context for 'turn it off again' or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         # TODO - Allow value set
         if "SetVerb" in message.data:
             ha_data['brightness'] = brightness_value
@@ -232,6 +244,7 @@ class HomeAssistantSkill(MycroftSkill):
                            (ha_entity['dev_name'], brightness_percentage))
         else:
             self.speak_dialog('homeassistant.error.sorry')
+            return False
 
     def handle_light_adjust_intent(self, message):
         entity = message.data["Entity"]
@@ -249,9 +262,11 @@ class HomeAssistantSkill(MycroftSkill):
             entity, ['group', 'light'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
-                              "dev_name": ha_entity['dev_name']})
-            return
+                              "dev_name": entity})
+            return False
         ha_data = {'entity_id': ha_entity['id']}
+        # set context for 'turn it off again' or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
 
         # if self.language == 'de':
         #    if action == 'runter' or action == 'dunkler':
@@ -304,6 +319,7 @@ class HomeAssistantSkill(MycroftSkill):
                                ha_entity['dev_name'])
         else:
             self.speak_dialog('homeassistant.error.sorry')
+            return False
 
     def handle_automation_intent(self, message):
         entity = message.data["Entity"]
@@ -314,8 +330,12 @@ class HomeAssistantSkill(MycroftSkill):
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
-                              "dev_name": ha_entity['dev_name']})
-            return
+                              "dev_name": entity})
+            return False
+
+        # set context for 'turn it off again' or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         LOGGER.debug("Triggered automation/scene/script: {}".format(ha_data))
         if "automation" in ha_entity['id']:
             self.ha.execute_service('automation', 'trigger', ha_data)
@@ -342,9 +362,13 @@ class HomeAssistantSkill(MycroftSkill):
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
-            return
+            return False
         ha_data = ha_entity
         entity = ha_entity['id']
+
+        # set context for 'read it out again' or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         unit_measurement = self.ha.find_entity_attr(entity)
         if unit_measurement[0] != 'null':
             sensor_unit = unit_measurement[0]
@@ -354,16 +378,42 @@ class HomeAssistantSkill(MycroftSkill):
                 self.speak(('{} ist {} {}'.format(
                     sensor_name, sensor_state, sensor_unit)))
             else:
-                self.speak(('Currently {} is {} {}'.format(
-                    sensor_name, sensor_state, sensor_unit)))
+                # extract unit for correct pronounciation
+                # this is fully optional
+                try:
+                    from quantulum import parser
+                    quantulumImport = True
+                except ImportError:
+                    quantulumImport = False
+
+                if quantulumImport:
+                    quantity = parser.parse((u'{} is {} {}'.format(
+                                      sensor_name, sensor_state, sensor_unit)))
+                    if len(quantity) > 0:
+                        quantity = quantity[0]
+                        if (quantity.unit.name != "dimensionless" and
+                           quantity.uncertainty <= 0.5):
+                            sensor_unit = quantity.unit.name
+                            sensor_state = quantity.value
+
+                self.speak_dialog('homeassistant.sensor', data={
+                              "dev_name": sensor_name,
+                              "value": sensor_state,
+                              "unit": sensor_unit})
+            # Add some context if the person wants to look the unit up
+            # Maybe also change to name
+            # if one wants to look up "outside temperature"
+            # self.set_context("SubjectOfInterest", sensor_unit)
         else:
             sensor_name = unit_measurement[1]
             sensor_state = unit_measurement[2]
             if self.language == 'de':
                 self.speak('{} ist {}'.format(sensor_name, sensor_state))
             else:
-                self.speak('Currently {} is {}'.format(
-                    sensor_name, sensor_state))
+                self.speak_dialog('homeassistant.sensor', data={
+                              "dev_name": sensor_name,
+                              "value": sensor_state,
+                              "unit": ''})
 
     # In progress, still testing.
     # Device location works.
@@ -376,9 +426,13 @@ class HomeAssistantSkill(MycroftSkill):
         ha_entity = self.ha.find_entity(entity, ['device_tracker'])
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
-                              "dev_name": ha_entity['dev_name']})
-            return
+                              "dev_name": entity})
+            return False
         ha_data = ha_entity
+
+        # set context for 'locate it off again' or similar
+        # self.set_context('Entity', ha_entity['dev_name'])
+
         entity = ha_entity['id']
         dev_name = ha_entity['dev_name']
         dev_location = ha_entity['state']
