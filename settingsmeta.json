@@ -20,7 +20,7 @@
                   },
                   {
                       "name": "portnum",
-                      "type": "int",
+                      "type": "Number",
                       "label": "portnum",
                       "value": ""
                   },
