@@ -20,13 +20,13 @@
                   },
                   {
                       "name": "portnum",
-                      "type": "int",
+                      "type": "Number",
                       "label": "portnum",
                       "value": ""
                   },
                   {
                       "name": "ssl",
-                      "type": "bool",
+                      "type": "text",
                       "label": "ssl",
                       "value": ""
                   }

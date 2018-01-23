@@ -6,10 +6,11 @@ from mycroft.util.log import getLogger
 
 from os.path import dirname, join
 from requests import get, post
+from requests.exceptions import ConnectionError
 from fuzzywuzzy import fuzz
 import json
 
-__author__ = 'robconnolly, btotharye'
+__author__ = 'robconnolly, btotharye, nielstron'
 LOGGER = getLogger(__name__)
 
 
@@ -48,6 +49,16 @@ class HomeAssistantClient(object):
                         score = fuzz.token_set_ratio(
                             entity,
                             state['attributes']['friendly_name'].lower())
+                        if score > best_score:
+                            best_score = score
+                            best_entity = {
+                                "id": state['entity_id'],
+                                "dev_name": state['attributes']
+                                ['friendly_name'],
+                                "state": state['state']}
+                        score = fuzz.token_set_ratio(
+                            entity,
+                            state['entity_id'].lower())
                         if score > best_score:
                             best_score = score
                             best_entity = {
@@ -169,12 +180,16 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Action: %s" % action)
         # TODO if entity is 'all', 'any' or 'every' turn on
         # every single entity not the whole group
-        ha_entity = self.ha.find_entity(
-            entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
+        try:
+            ha_entity = self.ha.find_entity(
+                entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": entity})
-            return False
+            return
         LOGGER.debug("Entity State: %s" % ha_entity['state'])
         ha_data = {'entity_id': ha_entity['id']}
 
@@ -206,7 +221,7 @@ class HomeAssistantSkill(MycroftSkill):
                                     ha_data)
         else:
             self.speak_dialog('homeassistant.error.sorry')
-            return False
+            return
 
     def handle_light_set_intent(self, message):
         entity = message.data["Entity"]
@@ -221,12 +236,16 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Brightness Value: %s" % brightness_value)
         LOGGER.debug("Brightness Percent: %s" % brightness_percentage)
-        ha_entity = self.ha.find_entity(
-            entity, ['group', 'light'])
+        try:
+            ha_entity = self.ha.find_entity(
+                entity, ['group', 'light'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": entity})
-            return False
+            return
         ha_data = {'entity_id': ha_entity['id']}
 
         # set context for 'turn it off again' or similar
@@ -244,7 +263,7 @@ class HomeAssistantSkill(MycroftSkill):
                            (ha_entity['dev_name'], brightness_percentage))
         else:
             self.speak_dialog('homeassistant.error.sorry')
-            return False
+            return
 
     def handle_light_adjust_intent(self, message):
         entity = message.data["Entity"]
@@ -258,12 +277,16 @@ class HomeAssistantSkill(MycroftSkill):
         # brightness_percentage = int(brightness_req) # debating use
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Brightness Value: %s" % brightness_value)
-        ha_entity = self.ha.find_entity(
-            entity, ['group', 'light'])
+        try:
+            ha_entity = self.ha.find_entity(
+                entity, ['group', 'light'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": entity})
-            return False
+            return
         ha_data = {'entity_id': ha_entity['id']}
         # set context for 'turn it off again' or similar
         # self.set_context('Entity', ha_entity['dev_name'])
@@ -319,19 +342,23 @@ class HomeAssistantSkill(MycroftSkill):
                                ha_entity['dev_name'])
         else:
             self.speak_dialog('homeassistant.error.sorry')
-            return False
+            return
 
     def handle_automation_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
         # also handle scene and script requests
-        ha_entity = self.ha.find_entity(entity,
-                                        ['automation', 'scene', 'script'])
+        try:
+            ha_entity = self.ha.find_entity(
+                entity, ['automation', 'scene', 'script'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": entity})
-            return False
+            return
 
         # set context for 'turn it off again' or similar
         # self.set_context('Entity', ha_entity['dev_name'])
@@ -358,11 +385,15 @@ class HomeAssistantSkill(MycroftSkill):
     def handle_sensor_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
-        ha_entity = self.ha.find_entity(entity, ['sensor'])
+        try:
+            ha_entity = self.ha.find_entity(entity, ['sensor'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
-            return False
+            return
         ha_data = ha_entity
         entity = ha_entity['id']
 
@@ -423,11 +454,15 @@ class HomeAssistantSkill(MycroftSkill):
     def handle_tracker_intent(self, message):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
-        ha_entity = self.ha.find_entity(entity, ['device_tracker'])
+        try:
+            ha_entity = self.ha.find_entity(entity, ['device_tracker'])
+        except ConnectionError:
+            self.speak_dialog('homeassistant.error.offline')
+            return
         if ha_entity is None:
             self.speak_dialog('homeassistant.device.unknown', data={
                               "dev_name": entity})
-            return False
+            return
         ha_data = ha_entity
 
         # set context for 'locate it off again' or similar
