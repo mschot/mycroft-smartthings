@@ -14,7 +14,7 @@ __author__ = 'robconnolly, btotharye, nielstron'
 LOGGER = getLogger(__name__)
 
 
-class HomeAssistantClient(object):
+class SmartThingsClient(object):
     def __init__(self, host, password, portnum, ssl=False, verify=True):
         self.ssl = ssl
         self.verify = verify
@@ -114,10 +114,10 @@ class HomeAssistantClient(object):
 # TODO - Localization
 
 
-class HomeAssistantSkill(MycroftSkill):
+class SmartThingsSkill(MycroftSkill):
     def __init__(self):
-        super(HomeAssistantSkill, self).__init__(name="HomeAssistantSkill")
-        self.ha = HomeAssistantClient(
+        super(SmartThingsSkill, self).__init__(name="SmartThingsSkill")
+        self.st = SmartThingsClient(
             self.config.get('host'),
             self.config.get('password'),
             self.config.get('portnum'),
@@ -181,13 +181,13 @@ class HomeAssistantSkill(MycroftSkill):
         # TODO if entity is 'all', 'any' or 'every' turn on
         # every single entity not the whole group
         try:
-            ha_entity = self.ha.find_entity(
+            ha_entity = self.st.find_entity(
                 entity, ['group', 'light', 'switch', 'scene', 'input_boolean'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": entity})
             return
         LOGGER.debug("Entity State: %s" % ha_entity['state'])
@@ -203,24 +203,24 @@ class HomeAssistantSkill(MycroftSkill):
                 action = 'off'
         if ha_entity['state'] == action:
             LOGGER.debug("Entity in requested state")
-            self.speak_dialog('homeassistant.device.already', data={
+            self.speak_dialog('smartthings.device.already', data={
                 "dev_name": ha_entity['dev_name'], 'action': action})
         elif action == "toggle":
-            self.ha.execute_service("homeassistant", "toggle",
+            self.st.execute_service("smartthings", "toggle",
                                     ha_data)
             if(ha_entity['state'] == 'off'):
                 action = 'on'
             else:
                 action = 'off'
-            self.speak_dialog('homeassistant.device.%s' % action,
+            self.speak_dialog('smartthings.device.%s' % action,
                               data=ha_entity)
         elif action in ["on", "off"]:
-            self.speak_dialog('homeassistant.device.%s' % action,
+            self.speak_dialog('smartthings.device.%s' % action,
                               data=ha_entity)
-            self.ha.execute_service("homeassistant", "turn_%s" % action,
+            self.st.execute_service("smartthings", "turn_%s" % action,
                                     ha_data)
         else:
-            self.speak_dialog('homeassistant.error.sorry')
+            self.speak_dialog('smartthings.error.sorry')
             return
 
     def handle_light_set_intent(self, message):
@@ -228,7 +228,7 @@ class HomeAssistantSkill(MycroftSkill):
         try:
             brightness_req = float(message.data["BrightnessValue"])
             if brightness_req > 100 or brightness_req < 0:
-                self.speak_dialog('homeassistant.brightness.badreq')
+                self.speak_dialog('smartthings.brightness.badreq')
         except KeyError:
             brightness_req = 10.0
         brightness_value = int(brightness_req / 100 * 255)
@@ -237,13 +237,13 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Brightness Value: %s" % brightness_value)
         LOGGER.debug("Brightness Percent: %s" % brightness_percentage)
         try:
-            ha_entity = self.ha.find_entity(
+            ha_entity = self.st.find_entity(
                 entity, ['group', 'light'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": entity})
             return
         ha_data = {'entity_id': ha_entity['id']}
@@ -254,7 +254,7 @@ class HomeAssistantSkill(MycroftSkill):
         # TODO - Allow value set
         if "SetVerb" in message.data:
             ha_data['brightness'] = brightness_value
-            self.ha.execute_service("homeassistant", "turn_on", ha_data)
+            self.st.execute_service("smartthings", "turn_on", ha_data)
             if self.language == 'de':
                 # TODO - Fix translation
                 self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
@@ -262,7 +262,7 @@ class HomeAssistantSkill(MycroftSkill):
                 self.speak("Set the %s brightness to %s percent" %
                            (ha_entity['dev_name'], brightness_percentage))
         else:
-            self.speak_dialog('homeassistant.error.sorry')
+            self.speak_dialog('smartthings.error.sorry')
             return
 
     def handle_light_adjust_intent(self, message):
@@ -270,7 +270,7 @@ class HomeAssistantSkill(MycroftSkill):
         try:
             brightness_req = float(message.data["BrightnessValue"])
             if brightness_req > 100 or brightness_req < 0:
-                self.speak_dialog('homeassistant.brightness.badreq')
+                self.speak_dialog('smartthings.brightness.badreq')
         except KeyError:
             brightness_req = 10.0
         brightness_value = int(brightness_req / 100 * 255)
@@ -278,13 +278,13 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Entity: %s" % entity)
         LOGGER.debug("Brightness Value: %s" % brightness_value)
         try:
-            ha_entity = self.ha.find_entity(
+            ha_entity = self.st.find_entity(
                 entity, ['group', 'light'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": entity})
             return
         ha_data = {'entity_id': ha_entity['id']}
@@ -306,13 +306,13 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
-                light_attrs = self.ha.find_entity_attr(ha_entity['id'])
+                light_attrs = self.st.find_entity_attr(ha_entity['id'])
                 ha_data['brightness'] = light_attrs[0]
                 if ha_data['brightness'] < brightness_value:
                     ha_data['brightness'] = 10
                 else:
                     ha_data['brightness'] -= brightness_value
-                self.ha.execute_service("homeassistant", "turn_on", ha_data)
+                self.st.execute_service("smartthings", "turn_on", ha_data)
                 if self.language == 'de':
                     self.speak("%s wurde gedimmt" % ha_entity['dev_name'])
                 else:
@@ -327,13 +327,13 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Can not dim %s. It is off." %
                                ha_entity['dev_name'])
             else:
-                light_attrs = self.ha.find_entity_attr(ha_entity['id'])
+                light_attrs = self.st.find_entity_attr(ha_entity['id'])
                 ha_data['brightness'] = light_attrs[0]
                 if ha_data['brightness'] > brightness_value:
                     ha_data['brightness'] = 255
                 else:
                     ha_data['brightness'] += brightness_value
-                self.ha.execute_service("homeassistant", "turn_on", ha_data)
+                self.st.execute_service("smartthings", "turn_on", ha_data)
                 if self.language == 'de':
                     self.speak("Erhoehe helligkeit auf %s" %
                                ha_entity['dev_name'])
@@ -341,7 +341,7 @@ class HomeAssistantSkill(MycroftSkill):
                     self.speak("Increased brightness of %s" %
                                ha_entity['dev_name'])
         else:
-            self.speak_dialog('homeassistant.error.sorry')
+            self.speak_dialog('smartthings.error.sorry')
             return
 
     def handle_automation_intent(self, message):
@@ -349,14 +349,14 @@ class HomeAssistantSkill(MycroftSkill):
         LOGGER.debug("Entity: %s" % entity)
         # also handle scene and script requests
         try:
-            ha_entity = self.ha.find_entity(
+            ha_entity = self.st.find_entity(
                 entity, ['automation', 'scene', 'script'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         ha_data = {'entity_id': ha_entity['id']}
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": entity})
             return
 
@@ -365,18 +365,18 @@ class HomeAssistantSkill(MycroftSkill):
 
         LOGGER.debug("Triggered automation/scene/script: {}".format(ha_data))
         if "automation" in ha_entity['id']:
-            self.ha.execute_service('automation', 'trigger', ha_data)
-            self.speak_dialog('homeassistant.automation.trigger',
+            self.st.execute_service('automation', 'trigger', ha_data)
+            self.speak_dialog('smartthings.automation.trigger',
                               data={"dev_name": ha_entity['dev_name']})
         elif "script" in ha_entity['id']:
-            self.speak_dialog('homeassistant.automation.trigger',
+            self.speak_dialog('smartthings.automation.trigger',
                               data={"dev_name": ha_entity['dev_name']})
-            self.ha.execute_service("homeassistant", "turn_on",
+            self.st.execute_service("smartthings", "turn_on",
                                     data=ha_data)
         elif "scene" in ha_entity['id']:
-            self.speak_dialog('homeassistant.device.on',
+            self.speak_dialog('smartthings.device.on',
                               data=ha_entity)
-            self.ha.execute_service("homeassistant", "turn_on",
+            self.st.execute_service("smartthings", "turn_on",
                                     data=ha_data)
 
     #
@@ -386,12 +386,12 @@ class HomeAssistantSkill(MycroftSkill):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
         try:
-            ha_entity = self.ha.find_entity(entity, ['sensor'])
+            ha_entity = self.st.find_entity(entity, ['sensor'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": ha_entity['dev_name']})
             return
         ha_data = ha_entity
@@ -400,7 +400,7 @@ class HomeAssistantSkill(MycroftSkill):
         # set context for 'read it out again' or similar
         # self.set_context('Entity', ha_entity['dev_name'])
 
-        unit_measurement = self.ha.find_entity_attr(entity)
+        unit_measurement = self.st.find_entity_attr(entity)
         if unit_measurement[0] != 'null':
             sensor_unit = unit_measurement[0]
             sensor_name = unit_measurement[1]
@@ -427,7 +427,7 @@ class HomeAssistantSkill(MycroftSkill):
                             sensor_unit = quantity.unit.name
                             sensor_state = quantity.value
 
-                self.speak_dialog('homeassistant.sensor', data={
+                self.speak_dialog('smartthings.sensor', data={
                               "dev_name": sensor_name,
                               "value": sensor_state,
                               "unit": sensor_unit})
@@ -441,7 +441,7 @@ class HomeAssistantSkill(MycroftSkill):
             if self.language == 'de':
                 self.speak('{} ist {}'.format(sensor_name, sensor_state))
             else:
-                self.speak_dialog('homeassistant.sensor', data={
+                self.speak_dialog('smartthings.sensor', data={
                               "dev_name": sensor_name,
                               "value": sensor_state,
                               "unit": ''})
@@ -455,12 +455,12 @@ class HomeAssistantSkill(MycroftSkill):
         entity = message.data["Entity"]
         LOGGER.debug("Entity: %s" % entity)
         try:
-            ha_entity = self.ha.find_entity(entity, ['device_tracker'])
+            ha_entity = self.st.find_entity(entity, ['device_tracker'])
         except ConnectionError:
-            self.speak_dialog('homeassistant.error.offline')
+            self.speak_dialog('smartthings.error.offline')
             return
         if ha_entity is None:
-            self.speak_dialog('homeassistant.device.unknown', data={
+            self.speak_dialog('smartthings.device.unknown', data={
                               "dev_name": entity})
             return
         ha_data = ha_entity
@@ -474,7 +474,7 @@ class HomeAssistantSkill(MycroftSkill):
         if self.language == 'de':
             self.speak('{} ist {}'.format(dev_name, dev_location))
         else:
-            self.speak_dialog('homeassistant.tracker.found',
+            self.speak_dialog('smartthings.tracker.found',
                               data={'dev_name': dev_name,
                                     'location': dev_location})
 
@@ -483,4 +483,4 @@ class HomeAssistantSkill(MycroftSkill):
 
 
 def create_skill():
-    return HomeAssistantSkill()
+    return SmartThingsSkill()
