@@ -1,33 +1,21 @@
 {
-  "identifier": "HomeAssistantSkill",
-  "name": "HomeAssistant",
+  "identifier": "SmartThings-Skill",
+  "name": "SmartThings",
   "skillMetadata": {
       "sections": [
           {
-              "name": "Login",
+              "name": "Endpoint",
               "fields": [
                   {
                       "name": "host",
                       "type": "text",
-                      "label": "host",
+                      "label": "Host",
                       "value": ""
                   },
                   {
-                      "name": "password",
-                      "type": "password",
-                      "label": "Password",
-                      "value": ""
-                  },
-                  {
-                      "name": "portnum",
-                      "type": "Number",
-                      "label": "portnum",
-                      "value": ""
-                  },
-                  {
-                      "name": "ssl",
+                      "name": "port",
                       "type": "text",
-                      "label": "ssl",
+                      "label": "Port",
                       "value": ""
                   }
               ]
